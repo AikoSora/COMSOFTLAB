@@ -8,6 +8,7 @@ class ServerForm(forms.ModelForm):
 
     class Meta:
         model = Server
+        fields = '__all__'
 
 
 __all__ = (

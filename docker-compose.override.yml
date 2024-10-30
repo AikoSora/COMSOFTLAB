@@ -1,0 +1,19 @@
+services:
+
+  postgres:
+    restart: always
+    ports:
+      - 5433:5432
+
+  redis:
+    restart: always
+    ports:
+      - "6379:6379"
+
+  django:
+    restart: always
+  
+  nginx:
+    restart: always
+    ports:
+      - 1081:80

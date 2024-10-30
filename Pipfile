@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 django = "*"
 python-dotenv = "*"
+channels = {extras = ["daphne"], version = "*"}
+psycopg = "*"
 
 [dev-packages]
 

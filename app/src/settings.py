@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 from os import getenv
+from re import sub
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,17 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-l(q62be2)^uhq3d@(2#j_**btn#qsg1w_b%*qn2#w2ms7n&08$'
+SECRET_KEY = getenv('SECRET_KEY', 'django-insecure-l(q62be2)^uhq3d@(2#j_**btn#qsg1w_b%*qn2#w2ms7n&08$')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(getenv('DEBUG', '0')))
 
-ALLOWED_HOSTS = ['*']
+APPLICATION_URL = getenv('APPLICATION_URL', '*')
+
+if DEBUG is True:
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = [sub(r'https?://', '', APPLICATION_URL).split(':')[0]]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -71,6 +78,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'src.wsgi.application'
+ASGI_APPLICATION = "src.asgi.application"
 
 
 # Database
@@ -104,6 +112,21 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# CORS, CSRF
+
+CSRF_COOKIE_DOMAIN = '.'.join(APPLICATION_URL.split('.')[-2:])
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CSRF_TRUSTED_ORIGINS = [APPLICATION_URL]
+else:
+    CORS_ALLOWED_ORIGINS = [APPLICATION_URL]
+    CSRF_TRUSTED_ORIGINS = []
+
+    for origin in ALLOWED_HOSTS:
+        CSRF_TRUSTED_ORIGINS.append(f'http://{origin}')
+        CSRF_TRUSTED_ORIGINS.append(f'https://{origin}')
 
 # Logging
 # https://docs.djangoproject.com/en/4.2/topics/logging/
@@ -153,6 +176,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+
+
+# Media files
+# https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-MEDIA_ROOT
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

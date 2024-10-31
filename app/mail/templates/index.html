@@ -12,7 +12,6 @@
         * {
             margin: 0;
             padding: 0;
-            overflow: hidden;
         }
 
         html {
@@ -80,34 +79,43 @@
             <span />
         </div>
         <div id='progress' class="progress" style="display: none">
-            <label for="file">Получение сообщений:</label>
-            <progress id="file" max="100" value="70">70%</progress>
+            <label for="progressBar">Получение сообщений:</label>
+            <progress id="progressBar" max="100" value="70">70%</progress>
         </div>
-        <p id="timer" style="display: none">Осталось: 00:00</p>
     </header>
     <content>
-        <table>
+        <table id="table">
             <thead>
                 <tr>
-                    <th>...</th>
-                    <th>...</th>
-                    <th>...</th>
-                    <th>...</th>
+                    <th>ID</th>
+                    <th>Folder</th>
+                    <th>Sender</th>
+                    <th>Theme</th>
+                    <th>Sending date</th>
+                    <th>Receiving date</th>
+                    <th>text</th>
+                    <th>Attachments</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                </tr>
-                <tr>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                </tr>
+                {% if mails %}
+                    {% for mail in mails %}
+                        <tr>
+                            <td>{{ mail.mail_id }}</td>
+                            <td>{{ mail.folder }}</td>
+                            <td>{{ mail.sender }}</td>
+                            <td>{{ mail.theme }}</td>
+                            <td>{{ mail.sending_date }}</td>
+                            <td>{{ mail.receiving_date }}</td>
+                            <td>{{ mail.text }}</td>
+                            <td>
+                                {% for attach in mail.attachments.all %}
+                                    <a href='/media/{{ attach }}'>File{{ forloop.counter }}</a>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
             </tbody>
         </table>
     </content>
@@ -120,15 +128,59 @@
 
         const actionElement = document.getElementById('action');
         const progressElement = document.getElementById('progress');
-        const timerElement = document.getElementById('timer');
+        const progressBar = document.getElementById('progressBar');
+
+        let message_count = 0;
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
+            if (data.action === 'close') {
+                actionElement.style.display = 'none';
+                progressElement.style.display = 'none';
+
+                socket.close();
+            }
+
             if (data.action === 'length') {
+                progressBar.max = data.message;
+            }
+
+            if (data.action === 'email') {
                 actionElement.style.display = 'none';
                 progressElement.style.display = 'block';
-                timerElement.style.display = 'block';
+
+                mail = JSON.parse(data.message.mail)[0];
+                mail = mail.fields;
+
+                $('#table').each(() => {
+                    row = $('<tr></tr>');
+                    mailId = $(`<td>${mail.mail_id}</td>`);
+                    folder = $(`<td>${mail.folder}</td>`);
+                    sender = $(`<td>${mail.sender}</td>`);
+                    theme = $(`<td>${mail.theme}</td>`);
+                    sendingDate = $(`<td>${new Date(mail.sending_date)}</td>`);
+                    receivingDate = $(`<td>${new Date(mail.receiving_date)}</td>`);
+                    text = $(`<td>${mail.text}</td>`);
+                    attachments = $('<td></td>');
+
+                    data.message.attachments.forEach((element, index) => {
+                        attachments.append($(`<a href='/media/${element}'>File${index}</a>`));
+                    })
+
+                    row.append(
+                        mailId, folder, sender,
+                        theme, sendingDate,
+                        receivingDate, text, attachments
+                    ).prependTo("#table");
+                });
+
+                message_count += 1;
+                progressBar.value = message_count;
+
+                if (message_count === progressBar.max) {
+                    progressElement.style.display = 'none';
+                }
             }
         };
 

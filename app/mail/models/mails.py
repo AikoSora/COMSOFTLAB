@@ -32,9 +32,19 @@ class Mail(models.Model):
             blank=True,
         )
 
-        sending_date = models.DateTimeField(verbose_name='Дата отправки')
+        sending_date = models.DateTimeField(
+            verbose_name='Дата отправки',
+            default=None,
+            null=True,
+            blank=True,
+        )
 
-        receiving_date = models.DateTimeField(verbose_name='Дата получения')
+        receiving_date = models.DateTimeField(
+            verbose_name='Дата получения',
+            default=None,
+            null=True,
+            blank=True,
+        )
 
         text = models.TextField(
             verbose_name='Текст сообщения',

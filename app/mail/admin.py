@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Server, Folder
+from .models import Server, Folder, Mail, Attachment
 from .forms import ServerForm
 
 
@@ -9,4 +9,6 @@ class ServerAdmin(admin.ModelAdmin):
     form = ServerForm
 
 
-admin.site.register(Folder)
+admin.site.register([
+    Folder, Mail, Attachment,
+])

@@ -13,6 +13,7 @@ class Folder(models.Model):
 
     else:
         name = models.TextField(verbose_name='Название')
+
         server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='folders')
 
     def __str__(self):

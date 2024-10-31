@@ -11,15 +11,15 @@ class Attachment(models.Model):
         from pathlib import Path
 
         mail: Mail
-        file: Path
+        file: str
 
     else:
         mail = models.ForeignKey(Mail, on_delete=models.CASCADE, related_name='attachments')
 
-        file = models.FileField()
+        file = models.TextField(verbose_name='URL файла')
 
     def __str__(self):
-        return f'{self.mail} | {self.file.name}'
+        return f'{self.mail} | {self.file}'
 
 
 __all__ = (

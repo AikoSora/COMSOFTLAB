@@ -1,3 +1,5 @@
+from django.core.serializers import serialize
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from ujson import loads, dumps
@@ -15,7 +17,7 @@ class EmailConsumer(AsyncWebsocketConsumer):
 
         try:
             text_data_json = loads(text_data)
-        except Exception as ex:
+        except Exception:
             await self.send(text_data='Goodbye!', close=True)
 
         data = text_data_json.get('action', None)
@@ -35,14 +37,28 @@ class EmailConsumer(AsyncWebsocketConsumer):
 
             mails = [x async for x in get_all_mails_id(server_list=servers)]
 
+            async for mail, attachments in handle_and_get_mails(raw_mails=mails):
+                await self.send(
+                    text_data=dumps(dict(
+                        action='email',
+                        message=dict(
+                            mail=serialize(
+                                format='json',
+                                queryset=[mail],
+                            ),
+                            attachments=attachments,
+                        ),
+                    )),
+                )
+
+            for server in servers:
+                await server.close()
+
             await self.send(
                 text_data=dumps(dict(
-                    action='length',
-                    message=len(mails)
-                ))
+                    action='close',
+                )),
             )
-
-            await handle_and_get_mails(raw_mails=mails)
 
 
 __all__ = (

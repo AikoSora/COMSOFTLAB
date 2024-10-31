@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>MailApp</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        html {
+            width: 100%; height: 100%;
+            background-color: #fcfcfc
+        }
+
+        body {
+            padding: 20px 16px;
+        }
+
+        a {
+            background-color: darkgray;
+            text-decoration: none;
+            text-align: center;
+            color: black;
+
+            padding: 4px 6px;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        header {
+            margin-bottom: 16px;
+        }
+
+        .action {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .action > span {
+            width: 16px; height: 16px;
+            border-top: 2px solid rgb(0, 214, 0);
+            border-right: 2px solid rgb(0, 214, 0);
+            border-radius: 50%;
+            animation: rotateAnimation 1.2s linear infinite;
+        }
+
+        @keyframes rotateAnimation {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id='action' class="action">
+            <p id="action">Чтение сообщений</p>
+            <span />
+        </div>
+        <div id='progress' class="progress" style="display: none">
+            <label for="file">Получение сообщений:</label>
+            <progress id="file" max="100" value="70">70%</progress>
+        </div>
+        <p id="timer" style="display: none">Осталось: 00:00</p>
+    </header>
+    <content>
+        <table>
+            <thead>
+                <tr>
+                    <th>...</th>
+                    <th>...</th>
+                    <th>...</th>
+                    <th>...</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+                <tr>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+            </tbody>
+        </table>
+    </content>
+    <script>
+        const socket = new WebSocket(
+            (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+            + window.location.host
+            + '/api/emails/'
+        );
+
+        const actionElement = document.getElementById('action');
+        const progressElement = document.getElementById('progress');
+        const timerElement = document.getElementById('timer');
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.action === 'length') {
+                actionElement.style.display = 'none';
+                progressElement.style.display = 'block';
+                timerElement.style.display = 'block';
+            }
+        };
+
+        socket.onopen = () => socket.send(
+            JSON.stringify({'action': 'update'}),
+        );
+
+        socket.onclose = () => console.error('Socket closed unexpectedly');
+
+    </script>
+</body>
+</html>

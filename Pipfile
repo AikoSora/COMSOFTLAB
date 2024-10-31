@@ -8,6 +8,10 @@ django = "*"
 python-dotenv = "*"
 channels = {extras = ["daphne"], version = "*"}
 psycopg = "*"
+channels-redis = "*"
+aioimaplib = "*"
+ujson = "*"
+pydantic = "*"
 
 [dev-packages]
 

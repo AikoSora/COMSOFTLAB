@@ -4,7 +4,10 @@ from .models import Server
 
 
 class ServerForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(
+        label='Пароль пользователя',
+        widget=forms.PasswordInput,
+    )
 
     class Meta:
         model = Server

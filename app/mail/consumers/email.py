@@ -6,7 +6,12 @@ from ujson import loads, dumps
 class EmailConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
-        from mail.services import get_all_mails
+        from mail.services import (
+            get_all_mails_id,
+            get_mails_count,
+            handle_and_get_mails,
+            get_imap_servers,
+        )
 
         try:
             text_data_json = loads(text_data)
@@ -16,7 +21,19 @@ class EmailConsumer(AsyncWebsocketConsumer):
         data = text_data_json.get('action', None)
 
         if data == 'update':
-            mails = [x async for x in get_all_mails()]
+
+            servers = await get_imap_servers()
+
+            await self.send(
+                text_data=dumps(dict(
+                    action='length',
+                    message=await get_mails_count(
+                        server_list=servers
+                    )
+                )),
+            )
+
+            mails = [x async for x in get_all_mails_id(server_list=servers)]
 
             await self.send(
                 text_data=dumps(dict(
@@ -24,6 +41,8 @@ class EmailConsumer(AsyncWebsocketConsumer):
                     message=len(mails)
                 ))
             )
+
+            await handle_and_get_mails(raw_mails=mails)
 
 
 __all__ = (

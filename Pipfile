@@ -12,6 +12,7 @@ channels-redis = "*"
 aioimaplib = "*"
 ujson = "*"
 pydantic = "*"
+beautifulsoup4 = "*"
 
 [dev-packages]
 

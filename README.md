@@ -1,5 +1,5 @@
 # COMSOFTLAB
-Test task
+A test assignment for a Python developer vacancy at COMSOFTLAB
 
 ## Run with docker-compose
 
